@@ -6,7 +6,17 @@ use openssl::ec::EcGroup;
 use openssl::ecdsa::EcdsaSig;
 use std::collections::HashMap;
 
-pub fn verify_ssv_callback(message: &str, key_id: &u64, signature: &str, public_keys: &HashMap<u64, String>) -> Result<bool, String> {
+pub fn verify_ssv_callback(query_string: &str, public_keys: &HashMap<u64, String>) -> Result<bool, String> {
+
+    //extract parts from full query string
+    let signature_position = query_string.find("&signature").unwrap();
+    let message = &query_string[..signature_position];
+    let sig_and_key_id_part =  String::from(&query_string[signature_position..]);
+    let key_id_position = sig_and_key_id_part.find("&key_id").unwrap();
+    let signature = &sig_and_key_id_part[11..key_id_position];
+    let key_id_part =  String::from(&sig_and_key_id_part[key_id_position..]);
+    let key_id = &key_id_part[8..].parse::<u64>().unwrap();
+
     //find the fitting Key in the HashMap of public keys. You should obtain those keys from https://www.gstatic.com/admob/reward/verifier-keys.json. See Readme
     let key = match public_keys.get(key_id) {
         None => { return Err(String::from("Key not found!")); }
@@ -49,3 +59,4 @@ pub fn verify_ssv_callback(message: &str, key_id: &u64, signature: &str, public_
         Err(_) => { Err(String::from("Error verifying")) }
     }
 }
+
