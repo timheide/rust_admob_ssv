@@ -1,5 +1,5 @@
-Rust AdMob SSV Validator
-========================
+Rust AdMob SSV Validation
+=========================
 
 This is a library for verifying a callback request (SSV) from AdMob. Please refer to the [official documentation](https://developers.google.com/admob/android/rewarded-video-ssv) for more information.
 
