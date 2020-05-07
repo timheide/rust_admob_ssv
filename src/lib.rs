@@ -13,11 +13,17 @@ pub fn verify_ssv_callback(message: &str, key_id: &u64, signature: &str, public_
         Some(x) => { x }
     };
 
+    //decode the base64 key as byte vector
     let mut octet_key = base64::decode(key).unwrap();
+    //reverse the byte vector
     octet_key.reverse();
+    //get 64 bytes (x and y points)
     octet_key.truncate(64);
+    //reverse byte vector again to regain correct order
     octet_key.reverse();
+    //split the byte vector in half to get both points
     let points = octet_key.split_at(32);
+    //create points
     let x = BigNum::from_slice(&points.0).unwrap();
     let y = BigNum::from_slice(&points.1).unwrap();
 
@@ -37,7 +43,7 @@ pub fn verify_ssv_callback(message: &str, key_id: &u64, signature: &str, public_
     hasher.input(unquoted);
     let hashed_data = hasher.result().as_slice().to_owned();
 
-
+    //verify signature
     match ecdsa_signature.verify(&hashed_data, &*ec_key) {
         Ok(x) => { Ok(x) }
         Err(_) => { Err(String::from("Error verifying")) }
