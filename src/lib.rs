@@ -3,25 +3,39 @@ use openssl::nid::Nid;
 use sha2::{Sha256, Digest};
 use openssl::bn::BigNum;
 use openssl::ec::EcGroup;
+use openssl::ec::EcKey;
 use openssl::ecdsa::EcdsaSig;
 use std::collections::HashMap;
 
 pub fn verify_ssv_callback(query_string: &str, public_keys: &HashMap<u64, String>) -> Result<bool, String> {
 
-    //extract parts from full query string
-    //TODO unsafe unwrap
-    let signature_position = query_string.find("&signature").unwrap();
+    //find position in query_string where signature starts, fail otherwise
+    let signature_position = match query_string.find("&signature") {
+        None => {return Err(String::from("Could not find &signature= parameter in query_string"))},
+        Some(x) => {x},
+    };
+
+    //message is query_string part until signature begins. this is the message that is later verified!
     let message = &query_string[..signature_position];
+    //extract part from query_string where signature starts (including key_id parameter)
     let sig_and_key_id_part =  String::from(&query_string[signature_position..]);
-    //TODO unsafe unwrap
-    let key_id_position = sig_and_key_id_part.find("&key_id").unwrap();
+    //find position of key_id parameter, fail otherwise
+    let key_id_position = match sig_and_key_id_part.find("&key_id") {
+        None => {return Err(String::from("Could not find &key_id= parameter in query_string"))},
+        Some(x) => {x},
+    };
+    //extract signature, this is later used to verify message against! remove leading 11 chars (&signature=)
     let signature = &sig_and_key_id_part[11..key_id_position];
+    //find key_id part from signature_and_key_id string
     let key_id_part =  String::from(&sig_and_key_id_part[key_id_position..]);
-    //TODO maybe unsafe unwrap
-    let key_id = &key_id_part[8..].parse::<u64>().unwrap();
+    //extract key_id (remove &key_id=). this is the public key_id from for the hashmap! parse as u64
+    let key_id = match key_id_part[8..].parse::<u64>() {
+        Ok(x) => {x},
+        Err(_) => {return Err(String::from("Could not parse key_id as u64!"))},
+    };
 
     //find the fitting Key in the HashMap of public keys. You should obtain those keys from https://www.gstatic.com/admob/reward/verifier-keys.json. See Readme
-    let key = match public_keys.get(key_id) {
+    let key = match public_keys.get(&key_id) {
         None => { return Err(String::from("Key not found!")); }
         Some(x) => { x }
     };
@@ -54,7 +68,7 @@ pub fn verify_ssv_callback(query_string: &str, public_keys: &HashMap<u64, String
     let group = EcGroup::from_curve_name(Nid::X9_62_PRIME256V1).unwrap();
     //elliptic curve key from x and y coordinates from public key
     //TODO unsafe unwrap
-    let ec_key = openssl::ec::EcKey::from_public_key_affine_coordinates(&*group, &*x, &*y).unwrap();
+    let ec_key = EcKey::from_public_key_affine_coordinates(&*group, &*x, &*y).unwrap();
 
     //convert url encoding to utf8 (%20, etc)
     //TODO unsafe unwrap
