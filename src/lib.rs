@@ -9,12 +9,15 @@ use std::collections::HashMap;
 pub fn verify_ssv_callback(query_string: &str, public_keys: &HashMap<u64, String>) -> Result<bool, String> {
 
     //extract parts from full query string
+    //TODO unsafe unwrap
     let signature_position = query_string.find("&signature").unwrap();
     let message = &query_string[..signature_position];
     let sig_and_key_id_part =  String::from(&query_string[signature_position..]);
+    //TODO unsafe unwrap
     let key_id_position = sig_and_key_id_part.find("&key_id").unwrap();
     let signature = &sig_and_key_id_part[11..key_id_position];
     let key_id_part =  String::from(&sig_and_key_id_part[key_id_position..]);
+    //TODO maybe unsafe unwrap
     let key_id = &key_id_part[8..].parse::<u64>().unwrap();
 
     //find the fitting Key in the HashMap of public keys. You should obtain those keys from https://www.gstatic.com/admob/reward/verifier-keys.json. See Readme
@@ -24,6 +27,7 @@ pub fn verify_ssv_callback(query_string: &str, public_keys: &HashMap<u64, String
     };
 
     //decode the base64 key as byte vector
+    //TODO unsafe unwrap
     let mut octet_key = base64::decode(key).unwrap();
     //reverse the byte vector
     octet_key.reverse();
@@ -34,19 +38,26 @@ pub fn verify_ssv_callback(query_string: &str, public_keys: &HashMap<u64, String
     //split the byte vector in half to get both points
     let points = octet_key.split_at(32);
     //create points
+    //TODO unsafe unwrap
     let x = BigNum::from_slice(&points.0).unwrap();
+    //TODO unsafe unwrap
     let y = BigNum::from_slice(&points.1).unwrap();
 
     //decode base64url signature as byte vector
+    //TODO unsafe unwrap
     let signature_bytes = BASE64URL_NOPAD.decode(signature.as_bytes()).unwrap();
     //create ecdas signature from base64url decoded byte vector
+    //TODO unsafe unwrap
     let ecdsa_signature = EcdsaSig::from_der(&signature_bytes).unwrap();
     //create ecdsa curve group from secp256r1
+    //TODO unsafe unwrap
     let group = EcGroup::from_curve_name(Nid::X9_62_PRIME256V1).unwrap();
     //elliptic curve key from x and y coordinates from public key
+    //TODO unsafe unwrap
     let ec_key = openssl::ec::EcKey::from_public_key_affine_coordinates(&*group, &*x, &*y).unwrap();
 
     //convert url encoding to utf8 (%20, etc)
+    //TODO unsafe unwrap
     let unquoted = urlparse::unquote(message).unwrap();
     //hash the result as input for verification
     let mut hasher = Sha256::new();
