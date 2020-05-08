@@ -1,3 +1,29 @@
+//! Rust AdMob SSV Validation
+//!
+//! This crate provides verification  a callback request (SSV) from AdMob. Please refer to the [documentation] for more information.
+//!
+//! It only does the verification process using openssl.
+//!
+//! It requires you to request the keys from the [AdMob key server]
+//! insert them into a `Hashmap<u64, String>` and hand it over to the verifciation function.
+//!
+//! ### How to use
+//!
+//! This library only has one function `verify_ssv_callback`. It takes two parameters:
+//!
+//! `query_string: String`: The full query String including signature and key_id from the [callback]
+//! `public_keys: Hashmap<u64, String>`: A HashMap of all public keys received from the [AdMob key server]
+//!
+//!
+//! It returns either `Ok(bool)` if the verification was successful/unsuccessful or not or `Err(String)` when encountering an error during the whole validation process.
+//!
+//!
+//! [documentation]: https://developers.google.com/admob/android/rewarded-video-ssv
+//! [AdMob key server]: https://gstatic.com/admob/reward/verifier-keys.json
+//! [callback]: https://developers.google.com/admob/android/rewarded-video-ssv#ssv_callback_parameters
+//!
+#![warn(missing_docs)]
+
 use data_encoding::BASE64URL_NOPAD;
 use openssl::nid::Nid;
 use sha2::{Sha256, Digest};
@@ -7,6 +33,7 @@ use openssl::ec::EcKey;
 use openssl::ecdsa::EcdsaSig;
 use std::collections::HashMap;
 
+/// Does the verification of a AdMob SSV callback
 pub fn verify_ssv_callback(query_string: &str, public_keys: &HashMap<u64, String>) -> Result<bool, String> {
 
     //find position in query_string where signature starts, fail otherwise
