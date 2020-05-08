@@ -12,4 +12,4 @@ This library only has one function `verify_ssv_callback`. It takes two parameter
 * `query_string: String`: The full query String including signature and key_id [Documentation](https://developers.google.com/admob/android/rewarded-video-ssv#ssv_callback_parameters)
 * `public_keys: Hashmap<u64, String>`: A HashMap of all public keys received from the [AdMob key server](https://gstatic.com/admob/reward/verifier-keys.json)
 
-It returns either `Ok(bool)` if the verification was successful or not or `Err(String)` with an error message. (Or it will panic..)
+It returns either `Ok(bool)` if the verification was successful/unsuccessful or not or `Err(String)` when encountering an error during the whole validation process.
