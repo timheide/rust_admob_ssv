@@ -3,6 +3,14 @@ name = "rust_admob_ssv"
 version = "0.1.0"
 authors = ["Tim Serowski <info@timserowski.de>"]
 edition = "2018"
+description="A rust implementation for verifying admob ssv callback requests using openssl"
+readme="README.md"
+repository="https://github.com/tserowski/rust_admob_ssv"
+homepage="https://github.com/tserowski/rust_admob_ssv"
+license="Apache-2.0"
+keywords=["AdMob", "Advertising"]
+categories=["game-development", "parsing", "authentication"]
+
 
 [dependencies]
 base64 = "0.12"
