@@ -5,8 +5,8 @@ authors = ["Tim Serowski <info@timserowski.de>"]
 edition = "2018"
 
 [dependencies]
-base64 = "0.12.1"
-data-encoding = "2.2.0"
-urlparse = "0.7.3"
-openssl = "0.10.29"
+base64 = "0.12"
+data-encoding = "2"
+urlparse = "0.7"
+openssl = "0.10"
 sha2 = "0.8"
